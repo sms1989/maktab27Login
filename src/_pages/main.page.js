@@ -1,18 +1,8 @@
 import React,{useState} from 'react';
 import background from '../_images/background.jpg';
 import { makeStyles } from '@material-ui/core/styles';
-import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import { Link,withRouter } from "react-router-dom";
-import Axios from 'axios';
-import {realtimeDate} from '../_constants/other.constants';
-import Snackbar from '@material-ui/core/Snackbar';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
+import { connect } from "react-redux";
 
 const useStyles = makeStyles(theme =>({
     title: {
@@ -21,7 +11,7 @@ const useStyles = makeStyles(theme =>({
     
 }));
 
-const MainPage = (props) => {
+const MainPage = ({user}) => {
 
     const classes = useStyles();
 
@@ -30,8 +20,15 @@ const MainPage = (props) => {
             Welcome
         </Typography>
         <Typography variant="h2" color="textPrimary" classes={{colorTextPrimary: classes.title}}>
-            {realtimeDate.userData.name}
+            {user.name}
         </Typography>
     </div>
 }
-export {MainPage};
+
+const mapStateToProps = state => {
+    const {user} = state.authentication;
+    return { user };
+};
+const ConnectedMainPage = connect(mapStateToProps)(MainPage);
+
+export {ConnectedMainPage as MainPage};

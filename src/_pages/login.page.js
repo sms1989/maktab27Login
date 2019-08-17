@@ -8,12 +8,12 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import { Link,withRouter } from "react-router-dom";
-import Axios from 'axios';
-import {HOST} from '../_constants/other.constants';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import {emit} from 'jetemit';
+import { connect } from "react-redux";
+import { authenticationAction } from "../_actions";
 
 const useStyles = makeStyles(theme =>({
     card: {
@@ -24,10 +24,15 @@ const useStyles = makeStyles(theme =>({
     },
     cardAction: {
         justifyContent: 'flex-end'
+    },
+    login:  {
+        color: '#FFF'
     }
 }));
 
 const LoginPage = (props) => {
+
+    const {dispatch,loginRequest} = props;
 
     const [values,setValues] = useState({
         login: '',
@@ -41,25 +46,10 @@ const LoginPage = (props) => {
         setValues({ ...values, [name]: value });
     };
 
-    const submitHandler = async (event) =>{
+    const submitHandler = (event) =>{
         event.preventDefault();
-        try{
-            const response = await Axios({
-                method: 'post',
-                url: `${HOST}/users/login`,
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                data: values
-            });
-            if (response.status === 200){
-                emit('login',response.data);
-                props.history.push('/');
-            }
-        } catch (error){
-            debugger
-            setResponseMessage(error.response.data.message);
-        }
+        
+        dispatch(authenticationAction.login(values.login,values.password,props.history));
     }
 
     const handleClose = () =>{
@@ -97,7 +87,9 @@ const LoginPage = (props) => {
                 </CardContent>
                 <CardActions className={classes.cardAction}>
                     <Button type="button" component={Link} to="/register" variant="outlined" size="small">Register</Button>
-                    <Button type="submit" size="small" variant="contained" color="primary">Login</Button>
+                    <Button type="submit" size="small" variant="contained" color="primary">{loginRequest ? 
+                    <CircularProgress size={20} classes = {{colorPrimary: classes.login}}/>
+                    : 'Login'}</Button>
                 </CardActions>
             </form>
         </Card>
@@ -128,5 +120,11 @@ const LoginPage = (props) => {
     </div>
 }
 
-withRouter(LoginPage);
-export {LoginPage};
+const mapStateToProps = state => {
+    const {loginRequest} = state.authentication;
+    
+    return { loginRequest };
+};
+
+const ConnectedLoginPage = withRouter(connect(mapStateToProps)(LoginPage));
+export {ConnectedLoginPage as LoginPage};
